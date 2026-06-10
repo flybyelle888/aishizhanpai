@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI实战派 - AI不空谈，落地才靠谱</title>
+    <meta name="description" content="AI不是学的，是'干'的。天津民宿老板用AI管13间房，带你真干。线下集训3000元/15天，AI工具599元U盘一插即用。">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            color: #1a1a1a;
+            line-height: 1.6;
+            background: #fff;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ---------- shared ---------- */
+        .section { padding: 56px 20px; }
+        .container { max-width: 680px; margin: 0 auto; }
+        .badge {
+            display: inline-block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #2563eb;
+            background: #eff6ff;
+            padding: 4px 10px;
+            border-radius: 4px;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+        h2 { font-size: 22px; font-weight: 700; margin-bottom: 20px; }
+        h3 { font-size: 17px; font-weight: 600; margin-bottom: 8px; }
+        p { color: #555; font-size: 15px; margin-bottom: 12px; }
+
+        /* ---------- hero ---------- */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 40px 20px;
+        }
+        .hero h1 {
+            font-size: 32px;
+            font-weight: 800;
+            line-height: 1.3;
+            margin-bottom: 16px;
+        }
+        .hero h1 em { font-style: normal; color: #2563eb; }
+        .hero .sub {
+            font-size: 16px;
+            color: #666;
+            max-width: 420px;
+            margin: 0 auto 28px;
+        }
+        .btn-group { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+        .btn {
+            display: inline-block;
+            padding: 13px 28px;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            transition: opacity .2s;
+        }
+        .btn:hover { opacity: .85; }
+        .btn-primary { background: #2563eb; color: #fff; }
+        .btn-outline { background: #fff; color: #2563eb; border: 1.5px solid #2563eb; }
+
+        /* ---------- card ---------- */
+        .card {
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 28px 24px;
+            margin-bottom: 16px;
+        }
+        .card .tag {
+            display: inline-block;
+            font-size: 12px;
+            color: #2563eb;
+            background: #e0edff;
+            padding: 2px 8px;
+            border-radius: 3px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        .price { font-size: 28px; font-weight: 800; color: #2563eb; }
+        .price small { font-size: 14px; font-weight: 400; color: #888; }
+
+        /* ---------- tools grid ---------- */
+        .tools-grid { display: grid; gap: 16px; }
+        @media (min-width: 480px) { .tools-grid { grid-template-columns: 1fr 1fr; } }
+        .tool-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 24px;
+            text-align: center;
+        }
+        .tool-icon { font-size: 36px; margin-bottom: 10px; }
+
+        /* ---------- highlight bar ---------- */
+        .highlight {
+            background: #f0f5ff;
+            border-left: 3px solid #2563eb;
+            padding: 14px 18px;
+            border-radius: 0 6px 6px 0;
+            font-size: 14px;
+            color: #333;
+            margin: 16px 0;
+        }
+
+        /* ---------- footer ---------- */
+        .footer {
+            background: #111;
+            color: #aaa;
+            text-align: center;
+            padding: 40px 20px;
+            font-size: 13px;
+        }
+        .footer .qrcode-placeholder {
+            width: 120px; height: 120px;
+            background: #333;
+            margin: 16px auto;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ====== Hero ====== -->
+<section class="hero" id="top">
+    <div class="container">
+        <div class="badge">AI 实战派</div>
+        <h1>AI 不是学的，<br>是<em>「干」</em>的。</h1>
+        <p class="sub">天津民宿老板，用 AI 管 13 间房。<br>不看 PPT，不住快捷酒店，住进来，真干 15 天。</p>
+        <div class="btn-group">
+            <a href="#bootcamp" class="btn btn-primary">看看线下集训</a>
+            <a href="#contact" class="btn btn-outline">加我微信</a>
+        </div>
+    </div>
+</section>
+
+<!-- ====== 线下集训 ====== -->
+<section class="section" id="bootcamp">
+    <div class="container">
+        <div class="badge">核心产品</div>
+        <h2>线下集训 · 15 天住进来真干</h2>
+        <p>不是网课，不是录播。你来天津，住进我的电竞民宿，和我一起用 AI 真实运营 13 间房。</p>
+
+        <div class="card">
+            <span class="tag">每期限 3 人</span>
+            <h3>AI 实战集训</h3>
+            <p>学什么？用 AI 写文案、做视频、管客服、跑通民宿全链路。每个人带一台电脑来，我帮你配环境，走的时候你带走一套能直接用的 AI 工具栈。</p>
+            <div class="highlight">
+                含 15 天住宿 · 天津津南区 · 国家会展中心旁 · 大学城核心
+            </div>
+            <p><span class="price">3000<small> 元/期</small></span></p>
+        </div>
+
+        <p style="font-size:13px;color:#999;">每期仅招 3 人，保证每个人都能上手。报名前建议先入手录播课了解基础。</p>
+        <div class="btn-group" style="justify-content:flex-start;margin-top:12px;">
+            <a href="#contact" class="btn btn-primary">咨询报名</a>
+            <a href="#video-course" class="btn btn-outline">先看录播课</a>
+        </div>
+    </div>
+</section>
+
+<!-- ====== 录播课 ====== -->
+<section class="section" id="video-course" style="background:#fafafa;">
+    <div class="container">
+        <div class="badge">引流课</div>
+        <h2>录播课 · AI 基础入门</h2>
+        <p>AI 是什么、能干什么、工具怎么装、环境怎么配。学完你就能判断哪些事交给 AI 做。</p>
+
+        <div class="card">
+            <h3>AI 实战基础课</h3>
+            <p>AI 基础认知 · 主流 AI 工具全景 · 软件环境配置实操 · 三个你能立刻用的 AI 技巧</p>
+            <p><span class="price">199<small> 元</small></span></p>
+            <p style="font-size:13px;color:#888;">买课后加微信，围观民宿 AI 运营日常，免费围观 7 天。</p>
+        </div>
+    </div>
+</section>
+
+<!-- ====== AI 工具 ====== -->
+<section class="section" id="tools">
+    <div class="container">
+        <div class="badge">AI 工具</div>
+        <h2>一插即用的 AI 工具</h2>
+        <p>U 盘交付，不用安装，不用配置。插上就用。599 元买断。</p>
+
+        <div class="tools-grid">
+            <div class="tool-card">
+                <div class="tool-icon">&#x1f3ac;</div>
+                <h3>一键视频合成</h3>
+                <p style="font-size:14px;">叙事类视频全自动生成。适合知识分享、解说、宣讲——一个人做一个自媒体号。</p>
+                <p><strong style="color:#2563eb;">599 元 / U 盘</strong></p>
+            </div>
+            <div class="tool-card">
+                <div class="tool-icon">&#x1f916;</div>
+                <h3>直播数字人</h3>
+                <p style="font-size:14px;">直播间互动 + 口播视频，代替真人出镜。24 小时在线替你说话。</p>
+                <p><strong style="color:#2563eb;">599 元 / U 盘</strong></p>
+            </div>
+        </div>
+
+        <p style="font-size:13px;color:#999;margin-top:16px;">每份 U 盘印有私域入口，购买后加微信，免费售后 + 工具更新。</p>
+    </div>
+</section>
+
+<!-- ====== 民宿案例 ====== -->
+<section class="section" id="case" style="background:#fafafa;">
+    <div class="container">
+        <div class="badge">活案例</div>
+        <h2>来看我是怎么干的</h2>
+        <p>13 间电竞民宿，一个人管。预订、入住、客服、退房、评价管理——全部跑在 AI 上。</p>
+
+        <div class="card">
+            <h3>天津 · 津南大学城 · 电竞民宿</h3>
+            <p style="font-size:14px;">国家会展中心旁，海河教育园区核心。大学生客群为主，商旅客户为辅。数字人客服 24 小时在线，AI 自动响应预订——这就是你的教学现场。</p>
+            <div class="highlight" style="font-size:13px;">
+                不是 PPT 案例。你来住，你来用，你来看数字人怎么接单。
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ====== 信任信号 ====== -->
+<section class="section">
+    <div class="container">
+        <div class="badge">信任</div>
+        <h2>为什么选 AI 实战派</h2>
+        <div class="tools-grid">
+            <div class="card" style="text-align:center;">
+                <div style="font-size:28px;margin-bottom:6px;">&#x1f3e0;</div>
+                <h3>实体民宿</h3>
+                <p style="font-size:14px;">线上 AI 培训千千万，有实体民宿让你住进来练的，只有这里。</p>
+            </div>
+            <div class="card" style="text-align:center;">
+                <div style="font-size:28px;margin-bottom:6px;">&#x1f4e0;</div>
+                <h3>自研工具</h3>
+                <p style="font-size:14px;">视频合成、直播数字人——都是自己做的，自己先用的。不是代理商。</p>
+            </div>
+            <div class="card" style="text-align:center;">
+                <div style="font-size:28px;margin-bottom:6px;">&#x1f465;</div>
+                <h3>小班真干</h3>
+                <p style="font-size:14px;">每期 3 人，15 天手把手。不录播，不放养，不走量。</p>
+            </div>
+            <div class="card" style="text-align:center;">
+                <div style="font-size:28px;margin-bottom:6px;">&#x1f4b0;</div>
+                <h3>低价实在</h3>
+                <p style="font-size:14px;">3000 元含 15 天住宿，一天不到 200——比住快捷酒店还便宜。</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ====== Footer / 私域入口 ====== -->
+<footer class="footer" id="contact">
+    <h2 style="color:#fff;font-size:18px;margin-bottom:8px;">扫码加我微信</h2>
+    <p style="color:#888;margin-bottom:16px;">先围观我怎么用 AI 管民宿，觉得对了再聊。</p>
+    <div class="qrcode-placeholder">[微信二维码]</div>
+    <p style="color:#666;font-size:12px;">
+        AI实战派 · aishizhanpai.cn<br>
+        天津津南区 · 大学城电竞民宿<br>
+        日更抖音 / 小红书 / B站 / 快手 / 视频号：<strong style="color:#aaa;">AI实战派</strong>
+    </p>
+</footer>
+
+</body>
+</html>
