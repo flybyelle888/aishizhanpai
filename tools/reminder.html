@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>发布提醒 · AI实战派</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:#f5f7fa;color:#1a1a1a;min-height:100vh}
+.header{background:linear-gradient(135deg,#2563eb,#1e40af);color:#fff;padding:20px 24px;text-align:center}
+.header h1{font-size:20px;font-weight:700;margin-bottom:4px}
+.header p{font-size:13px;opacity:.85}
+.container{max-width:900px;margin:0 auto;padding:16px}
+
+/* Tabs */
+.tabs{display:flex;gap:4px;margin-bottom:16px;background:#fff;border-radius:10px;padding:4px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.tab{flex:1;padding:10px 8px;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;background:transparent;color:#666;transition:all .2s}
+.tab.active{background:#2563eb;color:#fff}
+.tab:hover:not(.active){background:#f0f4ff}
+
+/* Calendar */
+.day-card{background:#fff;border-radius:10px;padding:16px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.04);border-left:3px solid #2563eb}
+.day-card.weekend{border-left-color:#94a3b8}
+.day-card.today{border-left-color:#f59e0b;box-shadow:0 2px 8px rgba(245,158,11,.15)}
+.day-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.day-name{font-size:17px;font-weight:700}
+.day-date{font-size:12px;color:#888}
+.platform-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f1f5f9;font-size:13px}
+.platform-row:last-child{border-bottom:none}
+.platform-tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;white-space:nowrap;min-width:50px;text-align:center}
+.tag-douyin{background:#111;color:#fff}
+.tag-kuaishou{background:#ff4906;color:#fff}
+.tag-xiaohongshu{background:#fe2c55;color:#fff}
+.tag-shipinhao{background:#07c160;color:#fff}
+.tag-bilibili{background:#fb7299;color:#fff}
+.platform-time{color:#888;font-size:11px;min-width:55px}
+.platform-task{flex:1;color:#444;font-size:12px}
+.platform-status{font-size:11px;padding:2px 6px;border-radius:3px;white-space:nowrap}
+.status-pending{background:#fef3c7;color:#92400e}
+.status-done{background:#d1fae5;color:#065f46;text-decoration:line-through}
+.toggle-btn{cursor:pointer;user-select:none;font-size:13px;padding:2px 0}
+
+/* Buttons */
+.btn-row{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+.btn{padding:10px 20px;border-radius:8px;border:none;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-primary{background:#2563eb;color:#fff}
+.btn-primary:hover{background:#1d4ed8}
+.btn-outline{background:#fff;color:#2563eb;border:1.5px solid #2563eb}
+.btn-outline:hover{background:#f0f4ff}
+.btn-small{padding:6px 12px;font-size:11px}
+
+/* Notification permission bar */
+.perm-bar{background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;display:flex;justify-content:space-between;align-items:center}
+.perm-bar.hidden{display:none}
+.perm-bar button{background:#f59e0b;color:#fff;border:none;padding:5px 12px;border-radius:5px;cursor:pointer;font-weight:600;font-size:11px}
+
+/* Legend */
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px;font-size:11px;color:#888}
+.legend span{display:flex;align-items:center;gap:4px}
+.legend-dot{width:8px;height:8px;border-radius:50%}
+.legend-dot.douyin{background:#111}
+.legend-dot.kuaishou{background:#ff4906}
+.legend-dot.xiaohongshu{background:#fe2c55}
+.legend-dot.shipinhao{background:#07c160}
+.legend-dot.bilibili{background:#fb7299}
+
+/* Stats */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-bottom:16px}
+.stat-card{background:#fff;border-radius:8px;padding:12px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.stat-num{font-size:28px;font-weight:800;color:#2563eb}
+.stat-label{font-size:11px;color:#888;margin-top:2px}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;z-index:999;opacity:0;transition:opacity .3s}
+.toast.show{opacity:1}
+
+/* History list */
+.history-item{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#fff;border-radius:8px;margin-bottom:6px;font-size:12px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+.history-time{color:#888;min-width:70px}
+.history-platform{font-weight:600}
+.history-task{flex:1;margin:0 8px;color:#555}
+.history-del{cursor:pointer;color:#ccc;font-size:16px;line-height:1}
+.history-del:hover{color:#ef4444}
+
+/* Responsive */
+@media(max-width:500px){
+  .tabs{overflow-x:auto}
+  .tab{font-size:11px;padding:8px 4px;white-space:nowrap}
+  .platform-row{gap:4px;font-size:11px}
+  .platform-tag{font-size:10px;min-width:44px;padding:1px 6px}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📅 发布提醒</h1>
+  <p>AI实战派 · 自媒体矩阵排期</p>
+</div>
+
+<div class="container">
+
+<div id="permBar" class="perm-bar hidden">
+  <span>🔔 开启浏览器通知，到点自动提醒发布</span>
+  <button onclick="requestPerm()">开启提醒</button>
+</div>
+
+<div class="stats" id="stats"></div>
+
+<div class="legend">
+  <span><span class="legend-dot douyin"></span>抖音 12:00</span>
+  <span><span class="legend-dot kuaishou"></span>快手 12:10</span>
+  <span><span class="legend-dot xiaohongshu"></span>小红书 08:00</span>
+  <span><span class="legend-dot shipinhao"></span>视频号 12:20</span>
+  <span><span class="legend-dot bilibili"></span>B站 周三/六 10:00</span>
+</div>
+
+<div class="tabs" id="tabs"></div>
+
+<div id="content"></div>
+
+<div class="btn-row">
+  <button class="btn btn-outline btn-small" onclick="resetToday()">🔄 重置今日状态</button>
+  <button class="btn btn-outline btn-small" onclick="exportHistory()">📋 导出记录</button>
+</div>
+
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+// === Data ===
+const PLATFORMS = [
+  {id:'xiaohongshu',name:'小红书',tag:'tag-xiaohongshu',time:'08:00',days:[1,2,3,4,5,6,7]},
+  {id:'douyin',name:'抖音',tag:'tag-douyin',time:'12:00',days:[1,2,3,4,5,6,7]},
+  {id:'kuaishou',name:'快手',tag:'tag-kuaishou',time:'12:10',days:[1,2,3,4,5,6,7]},
+  {id:'shipinhao',name:'视频号',tag:'tag-shipinhao',time:'12:20',days:[1,2,3,4,5,6,7]},
+  {id:'bilibili',name:'B站',tag:'tag-bilibili',time:'10:00',days:[3,6]}
+];
+
+const TASKS = {
+  xiaohongshu:{1:'大学生用AI找实习攻略',2:'AI工具开箱测评（视频合成）',3:'AI学习路线图',4:'民宿AI运营日常',5:'AI做作品集教程',6:'AI工具对比',7:'一周AI学习打卡'},
+  douyin:{1:'不用AI vs 用AI管民宿',2:'数字人客服24h接单',3:'AI一天生成30条视频',4:'AI写爆款文案',5:'AI做封面图',6:'数字人口播演示',7:'一周AI运营复盘'},
+  kuaishou:{1:'民宿AI咋干活',2:'天津民宿老板AI秘籍',3:'不花钱用AI做自媒体',4:'AI客服省钱秘籍',5:'AI替我做图',6:'老铁看我造数字人',7:'一周省了多少人力'},
+  shipinhao:{1:'同抖音S1-1',2:'同抖音S1-2',3:'同抖音S1-3',4:'同抖音',5:'同抖音',6:'同抖音',7:'同抖音'},
+  bilibili:{3:'B1-1：我用AI管13间民宿全流程',6:'B1-2：AI视频合成实操全流程'}
+};
+
+const DAYS = ['周一','周二','周三','周四','周五','周六','周日'];
+const FULL_DAYS = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
+
+// === State ===
+let currentWeek = 0; // 0=本周
+let completed = JSON.parse(localStorage.getItem('aizhanpai_completed')||'{}');
+let history = JSON.parse(localStorage.getItem('aizhanpai_history')||'[]');
+
+function getWeekKey(offset){
+  const d=new Date();
+  d.setDate(d.getDate()+offset*7);
+  const monday=new Date(d);
+  monday.setDate(d.getDate()-((d.getDay()+6)%7));
+  return monday.toISOString().slice(0,10);
+}
+
+function getDayDate(dayNum,offset){
+  const d=new Date();
+  d.setDate(d.getDate()+offset*7);
+  const monday=new Date(d);
+  monday.setDate(d.getDate()-((d.getDay()+6)%7));
+  monday.setDate(monday.getDate()+dayNum-1);
+  return monday.toISOString().slice(0,10);
+}
+
+function isToday(dayNum,offset){
+  const target=getDayDate(dayNum,offset);
+  const today=new Date().toISOString().slice(0,10);
+  return target===today;
+}
+
+function taskKey(platform,dayNum,offset){
+  return getWeekKey(offset)+'|'+platform+'|'+dayNum;
+}
+
+function isDone(platform,dayNum,offset){
+  return !!completed[taskKey(platform,dayNum,offset)];
+}
+
+function toggleTask(platform,dayNum,offset){
+  const key=taskKey(platform,dayNum,offset);
+  if(completed[key]){
+    delete completed[key];
+    history=history.filter(h=>h.key!==key);
+  }else{
+    completed[key]=true;
+    const now=new Date();
+    history.push({
+      key:key,
+      platform:platform,
+      platformName:PLATFORMS.find(p=>p.id===platform).name,
+      task:TASKS[platform]?.[dayNum]||'日常发布',
+      time:now.toLocaleString('zh-CN'),
+      date:getDayDate(dayNum,offset)
+    });
+  }
+  localStorage.setItem('aizhanpai_completed',JSON.stringify(completed));
+  localStorage.setItem('aizhanpai_history',JSON.stringify(history.slice(-200)));
+  render();
+}
+
+function render(){
+  // Stats
+  const totalPerWeek=PLATFORMS.reduce((s,p)=>s+p.days.length,0);
+  const doneThisWeek=PLATFORMS.reduce((s,p)=>s+p.days.filter(d=>isDone(p.id,d,0)).length,0);
+  document.getElementById('stats').innerHTML=`
+    <div class="stat-card"><div class="stat-num">${doneThisWeek}</div><div class="stat-label">本周已完成</div></div>
+    <div class="stat-card"><div class="stat-num">${totalPerWeek-doneThisWeek}</div><div class="stat-label">本周待发布</div></div>
+    <div class="stat-card"><div class="stat-num">${history.length}</div><div class="stat-label">历史记录</div></div>
+  `;
+
+  // Tabs
+  const weekLabel=currentWeek===0?'本周':currentWeek===1?'下周':'上'+'周';
+  const weekKey=getWeekKey(currentWeek);
+  document.getElementById('tabs').innerHTML=`
+    <button class="tab${currentWeek===0?' active':''}" onclick="switchWeek(0)">📌 本周</button>
+    <button class="tab${currentWeek===1?' active':''}" onclick="switchWeek(1)">📅 下周</button>
+    <button class="tab" onclick="switchTab('history')">📋 历史</button>
+  `;
+
+  // Content
+  const content=document.getElementById('content');
+  if(currentWeek===0||currentWeek===1){
+    let html='';
+    for(let d=1;d<=7;d++){
+      const dateStr=getDayDate(d,currentWeek);
+      const todayClass=isToday(d,currentWeek)?' today':'';
+      const weekendClass=(d>=6)?' weekend':'';
+      const dateObj=new Date(dateStr+'T00:00:00');
+      const month=dateObj.getMonth()+1;
+      const day=dateObj.getDate();
+      html+=`<div class="day-card${todayClass}${weekendClass}">`;
+      html+=`<div class="day-header"><span class="day-name">${DAYS[d-1]} ${month}/${day}</span><span class="day-date">${FULL_DAYS[dateObj.getDay()]}</span></div>`;
+      PLATFORMS.forEach(p=>{
+        if(!p.days.includes(d))return;
+        const done=isDone(p.id,d,currentWeek);
+        html+=`<div class="platform-row">`;
+        html+=`<span class="platform-tag ${p.tag}">${p.name}</span>`;
+        html+=`<span class="platform-time">${p.time}</span>`;
+        html+=`<span class="platform-task">${TASKS[p.id]?.[d]||'日常发布'}</span>`;
+        html+=`<span class="platform-status ${done?'status-done':'status-pending'} toggle-btn" onclick="toggleTask('${p.id}',${d},${currentWeek})">${done?'✅ 已发':'⏳ 待发'}</span>`;
+        html+=`</div>`;
+      });
+      html+=`</div>`;
+    }
+    content.innerHTML=html;
+  }else{
+    // History tab
+    let hhtml='<div style="font-size:14px;font-weight:600;margin-bottom:8px">📋 最近发布记录</div>';
+    if(history.length===0){
+      hhtml+='<p style="color:#888;font-size:13px;text-align:center;padding:24px">暂无记录</p>';
+    }else{
+      [...history].reverse().slice(0,50).forEach(h=>{
+        hhtml+=`<div class="history-item">`;
+        hhtml+=`<span class="history-time">${h.time.slice(5)}</span>`;
+        hhtml+=`<span class="history-platform">${h.platformName}</span>`;
+        hhtml+=`<span class="history-task">${h.task}</span>`;
+        hhtml+=`<span class="history-del" onclick="delHistory('${h.key}')">&times;</span>`;
+        hhtml+=`</div>`;
+      });
+    }
+    content.innerHTML=hhtml;
+  }
+}
+
+function switchWeek(n){currentWeek=n;render();}
+function switchTab(t){if(t==='history'){currentWeek=-1;render();}}
+function delHistory(key){
+  delete completed[key];
+  history=history.filter(h=>h.key!==key);
+  localStorage.setItem('aizhanpai_completed',JSON.stringify(completed));
+  localStorage.setItem('aizhanpai_history',JSON.stringify(history.slice(-200)));
+  render();
+}
+function resetToday(){
+  const today=new Date().getDay();
+  const dayNum=today===0?7:today;
+  PLATFORMS.forEach(p=>{
+    if(!p.days.includes(dayNum))return;
+    const key=taskKey(p.id,dayNum,0);
+    delete completed[key];
+    history=history.filter(h=>h.key!==key);
+  });
+  localStorage.setItem('aizhanpai_completed',JSON.stringify(completed));
+  localStorage.setItem('aizhanpai_history',JSON.stringify(history.slice(-200)));
+  render();
+  toastMsg('今日状态已重置');
+}
+function exportHistory(){
+  const csv='时间,平台,任务\n'+history.map(h=>`${h.time},${h.platformName},${h.task}`).join('\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='发布记录_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+  toastMsg('记录已导出');
+}
+
+// === Notifications ===
+function requestPerm(){
+  if(!('Notification' in window)){toastMsg('浏览器不支持通知');return;}
+  Notification.requestPermission().then(p=>{
+    if(p==='granted'){
+      document.getElementById('permBar').classList.add('hidden');
+      scheduleNotifications();
+      toastMsg('✅ 通知已开启');
+    }else{toastMsg('需要允许通知才能提醒');}
+  });
+}
+
+function scheduleNotifications(){
+  if(!('Notification' in window)||Notification.permission!=='granted')return;
+  const now=new Date();
+  PLATFORMS.forEach(p=>{
+    p.days.forEach(dayNum=>{
+      if(isDone(p.id,dayNum,0))return;
+      const [h,m]=p.time.split(':').map(Number);
+      const target=new Date(getDayDate(dayNum,0)+'T'+p.time+':00');
+      if(target<=now)return;
+      const ms=target-now;
+      if(ms>86400000)return; // skip >24h
+      const taskName=TASKS[p.id]?.[dayNum]||'日常发布';
+      setTimeout(()=>{
+        if(isDone(p.id,dayNum,0))return;
+        new Notification(`⏰ ${p.name} 发布提醒`,{body:`${taskName}\n发布时间：${p.time}`,icon:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="%232563eb"/><text x="50" y="60" text-anchor="middle" fill="white" font-size="35" font-weight="bold">AI</text></svg>',requireInteraction:true});
+      },ms);
+    });
+  });
+}
+
+function toastMsg(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2000);
+}
+
+// === Init ===
+(function init(){
+  if('Notification' in window&&Notification.permission==='default'){
+    document.getElementById('permBar').classList.remove('hidden');
+  }
+  if(Notification.permission==='granted')scheduleNotifications();
+  render();
+  // Reschedule every 30 min
+  setInterval(()=>{if(Notification.permission==='granted')scheduleNotifications();},1800000);
+})();
+</script>
+
+</body>
+</html>
