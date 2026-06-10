@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -120,7 +120,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
 <div id="content"></div>
 
 <div class="btn-row">
-  <button class="btn btn-outline btn-small" onclick="resetToday()">🔄 重置今日状态</button>
+    <button class="btn btn-primary btn-small" onclick="exportICS()">📱 导出手机日历</button>
+      <button class="btn btn-outline btn-small" onclick="resetToday()">🔄 重置今日状态</button>
   <button class="btn btn-outline btn-small" onclick="exportHistory()">📋 导出记录</button>
 </div>
 
@@ -279,6 +280,42 @@ function delHistory(key){
   localStorage.setItem('aizhanpai_completed',JSON.stringify(completed));
   localStorage.setItem('aizhanpai_history',JSON.stringify(history.slice(-200)));
   render();
+}
+
+function exportICS(){
+  const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//AI实战派//CN','CALSCALE:GREGORIAN','METHOD:PUBLISH','X-WR-CALNAME:AI实战派 发布提醒'];
+  for(let offset=0;offset<=1;offset++){
+    for(let d=1;d<=7;d++){
+      PLATFORMS.forEach(p=>{
+        if(!p.days.includes(d))return;
+        const dateStr=getDayDate(d,offset);
+        const [h,m]=p.time.split(':').map(Number);
+        const taskName=TASKS[p.id]?.[d]||'日常发布';
+        const start=dateStr.replace(/-/g,'')+'T'+String(h).padStart(2,'0')+String(m).padStart(2,'0')+'00';
+        const endH=m+15>=60?h+1:h;
+        const endM=(m+15)%60;
+        const end=dateStr.replace(/-/g,'')+'T'+String(endH).padStart(2,'0')+String(endM).padStart(2,'0')+'00';
+        ics.push('BEGIN:VEVENT');
+        ics.push('DTSTART:'+start);
+        ics.push('DTEND:'+end);
+        ics.push('SUMMARY:'+p.name+' '+taskName);
+        ics.push('DESCRIPTION:发布时间 '+p.time+'\\n平台：'+p.name+'\\n内容：'+taskName);
+        ics.push('BEGIN:VALARM');
+        ics.push('TRIGGER:-PT15M');
+        ics.push('ACTION:DISPLAY');
+        ics.push('DESCRIPTION:'+p.name+' 15分钟后发布：'+taskName);
+        ics.push('END:VALARM');
+        ics.push('END:VEVENT');
+      });
+    }
+  }
+  ics.push('END:VCALENDAR');
+  const blob=new Blob([ics.join('\r\n')],{type:'text/calendar;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='AI实战派_发布提醒.ics';
+  a.click();
+  toastMsg('已下载，用手机打开即可导入日历');
 }
 function resetToday(){
   const today=new Date().getDay();
