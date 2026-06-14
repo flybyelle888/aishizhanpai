@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -82,6 +82,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
 .history-del{cursor:pointer;color:#ccc;font-size:16px;line-height:1}
 .history-del:hover{color:#ef4444}
 
+/* Export Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal-overlay.hidden{display:none}
+.modal-box{background:#fff;border-radius:12px;max-width:600px;width:100%;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+.modal-header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid #eee}
+.modal-header h3{font-size:16px;font-weight:700}
+.modal-close{cursor:pointer;font-size:20px;color:#999;line-height:1;background:none;border:none}
+.modal-close:hover{color:#333}
+.modal-body{padding:16px 20px;overflow-y:auto;flex:1}
+.modal-body textarea{width:100%;height:260px;border:1px solid #e2e8f0;border-radius:6px;padding:10px;font-size:12px;font-family:monospace;resize:vertical;background:#f8fafc}
+.modal-footer{display:flex;gap:8px;padding:12px 20px;border-top:1px solid #eee;justify-content:flex-end}
+.modal-footer .btn{padding:8px 16px;font-size:12px}
+.modal-footer .btn-green{background:#10b981;color:#fff;border:none}
+.modal-footer .btn-green:hover{background:#059669}
+
 /* Responsive */
 @media(max-width:500px){
   .tabs{overflow-x:auto}
@@ -129,6 +144,24 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
 
 <div id="toast" class="toast"></div>
 
+<!-- Export Modal -->
+<div id="exportModal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>📋 导出发布记录 <span id="exportCount" style="color:#888;font-weight:400;font-size:13px">0</span>条</h3>
+      <button class="modal-close" onclick="closeExportModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <textarea id="exportTextarea" readonly placeholder="暂无记录"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="copyExport()">📋 一键复制</button>
+      <button class="btn btn-green" onclick="downloadExport()">💾 下载 CSV</button>
+      <button class="btn btn-outline" onclick="closeExportModal()">关闭</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // === Data ===
 const PLATFORMS = [
@@ -151,7 +184,7 @@ const DAYS = ['周一','周二','周三','周四','周五','周六','周日'];
 const FULL_DAYS = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
 
 // === State ===
-let currentWeek = 0; // 0=本周
+let currentWeek = 0;
 let completed = JSON.parse(localStorage.getItem('aizhanpai_completed')||'{}');
 let history = JSON.parse(localStorage.getItem('aizhanpai_history')||'[]');
 
@@ -209,7 +242,6 @@ function toggleTask(platform,dayNum,offset){
 }
 
 function render(){
-  // Stats
   const totalPerWeek=PLATFORMS.reduce((s,p)=>s+p.days.length,0);
   const doneThisWeek=PLATFORMS.reduce((s,p)=>s+p.days.filter(d=>isDone(p.id,d,0)).length,0);
   document.getElementById('stats').innerHTML=`
@@ -218,16 +250,12 @@ function render(){
     <div class="stat-card"><div class="stat-num">${history.length}</div><div class="stat-label">历史记录</div></div>
   `;
 
-  // Tabs
-  const weekLabel=currentWeek===0?'本周':currentWeek===1?'下周':'上'+'周';
-  const weekKey=getWeekKey(currentWeek);
   document.getElementById('tabs').innerHTML=`
     <button class="tab${currentWeek===0?' active':''}" onclick="switchWeek(0)">📌 本周</button>
     <button class="tab${currentWeek===1?' active':''}" onclick="switchWeek(1)">📅 下周</button>
     <button class="tab" onclick="switchTab('history')">📋 历史</button>
   `;
 
-  // Content
   const content=document.getElementById('content');
   if(currentWeek===0||currentWeek===1){
     let html='';
@@ -254,7 +282,6 @@ function render(){
     }
     content.innerHTML=html;
   }else{
-    // History tab
     let hhtml='<div style="font-size:14px;font-weight:600;margin-bottom:8px">📋 最近发布记录</div>';
     if(history.length===0){
       hhtml+='<p style="color:#888;font-size:13px;text-align:center;padding:24px">暂无记录</p>';
@@ -317,6 +344,7 @@ function exportICS(){
   a.click();
   toastMsg('已下载，用手机打开即可导入日历');
 }
+
 function resetToday(){
   const today=new Date().getDay();
   const dayNum=today===0?7:today;
@@ -331,14 +359,34 @@ function resetToday(){
   render();
   toastMsg('今日状态已重置');
 }
+
 function exportHistory(){
-  const csv='时间,平台,任务\n'+history.map(h=>`${h.time},${h.platformName},${h.task}`).join('\n');
-  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download='发布记录_'+new Date().toISOString().slice(0,10)+'.csv';
-  a.click();
-  toastMsg('记录已导出');
+  if(history.length===0){toastMsg('暂无发布记录可导出');return;}
+  const lines=['时间,平台,任务'];
+  history.forEach(h=>lines.push(`${h.time},${h.platformName},${h.task}`));
+  const csv='\uFEFF'+lines.join('\n');
+  document.getElementById('exportTextarea').value=lines.join('\n');
+  document.getElementById('exportCount').textContent=history.length;
+  window._exportCSV=csv;
+  document.getElementById('exportModal').classList.remove('hidden');
+}
+
+function closeExportModal(){
+  document.getElementById('exportModal').classList.add('hidden');
+}
+
+function copyExport(){
+  const ta=document.getElementById('exportTextarea');
+  ta.select();
+  navigator.clipboard.writeText(ta.value).then(()=>toastMsg('✅ 已复制到剪贴板')).catch(()=>toastMsg('复制失败，请手动选择'));
+}
+
+function downloadExport(){
+  if(!window._exportCSV)return;
+  const blob=new Blob([window._exportCSV],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='发布记录_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+  toastMsg('📥 CSV 已下载');
 }
 
 // === Notifications ===
@@ -363,7 +411,7 @@ function scheduleNotifications(){
       const target=new Date(getDayDate(dayNum,0)+'T'+p.time+':00');
       if(target<=now)return;
       const ms=target-now;
-      if(ms>86400000)return; // skip >24h
+      if(ms>86400000)return;
       const taskName=TASKS[p.id]?.[dayNum]||'日常发布';
       setTimeout(()=>{
         if(isDone(p.id,dayNum,0))return;
@@ -387,7 +435,6 @@ function toastMsg(msg){
   }
   if(Notification.permission==='granted')scheduleNotifications();
   render();
-  // Reschedule every 30 min
   setInterval(()=>{if(Notification.permission==='granted')scheduleNotifications();},1800000);
 })();
 </script>
